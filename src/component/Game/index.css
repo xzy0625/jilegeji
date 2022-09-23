@@ -1,0 +1,75 @@
+.card-wrap {
+  position: relative;
+  margin: 10% auto 0 auto;
+}
+
+.card-item {
+  font-size: 28px;
+  position: absolute;
+  text-align: center;
+  border-radius: 2px;
+  box-sizing: border-box;
+  background: #ddd;
+  opacity: 1;
+  cursor: pointer;
+  transition: all 0.3;
+  box-shadow: 0px 3px 0 0 #fff, 0 8px 0 0 #ddd, 0 8px 0 2px #333, 0 0 0 2px #333;
+}
+
+/* 悬浮变大一丢丢 */
+.card-item:hover {
+  transform: scale3d(1.1, 1.1, 1.1);
+  z-index: 1;
+}
+
+.item-cover {
+  pointer-events: none;
+  box-shadow: 0px 3px 0 0 #999, 0 8px 0 0 #666, 0 8px 0 2px #000, 0 0 0 2px #000;
+}
+
+/* 利用伪元素使不可见 */
+.item-cover:after {
+  border-radius: 2px;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: #000;
+  opacity: 0.55;
+}
+
+.tools {
+  position: absolute;
+  display: flex;
+  justify-content: space-around;
+  top: 160%;
+  width: 100%;
+  left: 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+.select-list {
+  position: absolute;
+  top: 120%;
+  border: 2px solid #000;
+  z-index: -999;
+}
+
+.tools-item {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(34, 155, 196);
+  box-shadow: 0px 3px 0 0 #fff, 0 8px 0 0 #ddd, 0 8px 0 2px #333, 0 0 0 2px #333;
+}
+
+/* 悬浮变大一丢丢 */
+.tools-item:hover {
+  transform: scale3d(1.1, 1.1, 1.1);
+  z-index: 1;
+}
