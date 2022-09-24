@@ -3,6 +3,13 @@
   margin: 10% auto 0 auto;
 }
 
+.tips {
+  position: absolute;
+  top: -20%;
+  left: 20%;
+  font-size: 20px;
+}
+
 .card-item {
   font-size: 28px;
   position: absolute;
@@ -55,7 +62,12 @@
   position: absolute;
   top: 120%;
   border: 2px solid #000;
-  z-index: -999;
+}
+
+.save-list {
+  position: absolute;
+  top: 90%;
+  border: 2px solid #000;
 }
 
 .tools-item {

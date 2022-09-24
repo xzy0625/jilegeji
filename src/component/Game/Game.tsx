@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useCardValue, calcuCover, useMap, findItemIndex } from "./useGame";
+import { Badge, message } from "antd";
 import './index.css'
-import { useCardValue, calcuCover, useMap } from "./useGame";
 
 const SVG_LIST = {
   SAVE: (<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9952" width="40" height="40"><path d="M695.15 479.59c-132.66 0-240.2 107.54-240.2 240.2S562.49 960 695.15 960A238.47 238.47 0 0 0 868 888a234.15 234.15 0 0 0 67.11-169.64c-0.16-132-107.31-238.92-239.33-238.76zM698 899.22A178.28 178.28 0 0 1 695.15 543a181.44 181.44 0 0 1 182.6 176.55 177.7 177.7 0 0 1-175.66 179.67q-2.03 0.02-4.09 0z" fill="#f4ea2a" p-id="9953"></path><path d="M753 605.45l-69.41 66.82a28.8 28.8 0 0 0-19.3 28.8v135.65a28.8 28.8 0 0 0 30.82 30.82 31.68 31.68 0 0 0 31.1-30.82v-120.1l67.11-67.39a28.8 28.8 0 0 0 0-43.49 27.07 27.07 0 0 0-40.32-0.29z" fill="#f4ea2a" p-id="9954"></path><path d="M483.18 883.09H218.79A135.36 135.36 0 0 1 84 748V198.79A135.08 135.08 0 0 1 218.79 64h538.28a135.08 135.08 0 0 1 134.79 134.79v339l-22.75-22.46a254.6 254.6 0 0 0-39.75-32.54l-5.76-4V198.5a66.53 66.53 0 0 0-51-64.23V311.4a92.45 92.45 0 0 1-92.45 92.45H298.57a92.45 92.45 0 0 1-92.45-92.45V133.7a66.82 66.82 0 0 0-53.57 65.09V748a66.53 66.53 0 0 0 66.53 66.53h220.61l3.46 7.49a294.34 294.34 0 0 0 24.48 39.75zM274.66 132.55V311.4a23.9 23.9 0 0 0 23.9 23.9h381a24.48 24.48 0 0 0 24.19-23.9V132.55z" fill="#f4ea2a" p-id="9955"></path><path d="M593.2 306.21a40.32 40.32 0 0 1-40.32-40.32v-60.77a40.32 40.32 0 1 1 80.64 0v60.48a40.32 40.32 0 0 1-40 40.61z" fill="#f4ea2a" p-id="9956"></path></svg>),
@@ -14,7 +15,7 @@ interface IProps {
   [props: string]: any;
 }
 const Gaming = ({config, changeWin}: IProps) => {
-  const { x, y, baseWidth, baseHeight } = config;
+  const { x, y, baseWidth, baseHeight, retryNumber, shuffleNumber, saveNumber } = config;
   // 展示区域宽度
   const width = useMemo(() => ((x - 1) * 2 + 2) * baseWidth, [config]);
   // 展示区域高度
@@ -37,6 +38,13 @@ const Gaming = ({config, changeWin}: IProps) => {
   const [clearList, setClearList] = useState([] as ICardItem[]);
   // 保存的卡片
   const [saveList, setSaveList] = useState([] as ICardItem[]);
+  // 历史操作过的卡片
+  const [historyList, setHistoryList] = useState([] as ICardItem[]);
+  // 能使用的次数
+  const [retryCount, setRetryCount] = useState(retryNumber);
+  const [saveCount, setSaveCount] = useState(saveNumber);
+  const [shuffleCount, setShuffleCount] = useState(shuffleNumber);
+
 
   useEffect(() => {
     // 初始化游戏
@@ -51,6 +59,20 @@ const Gaming = ({config, changeWin}: IProps) => {
     setTotalCard(fillValueItemList.length);
     // 返回计算层级之后的东西
     setCardItemList(calcuCover(config, fillValueItemList));
+  }
+
+  // 格式化样式
+  const formatItemList = (cardList: ICardItem[]) => {
+    return cardList.map((item, index) => {
+      return {
+        ...item,
+        style: {
+          ...item.style,
+          top: 0,
+          left: leftOffset + (index + 1) * baseWidth * 2 + "px",
+        }
+      }
+    })
   }
 
   // 判断是否有三个一样的
@@ -68,7 +90,7 @@ const Gaming = ({config, changeWin}: IProps) => {
     // 有三个一样的了
     if (count === 3) {
       // 更新已经消除的和已经选择的
-      tempClearList = selectList.filter(selectItem => selectItem.content === item.content);
+      tempClearList = [...selectList.filter(selectItem => selectItem.content === item.content), item];
       selectList = selectList.filter(selectItem => selectItem.content !== item.content);
     } else {
       if (index > -1) {
@@ -89,44 +111,137 @@ const Gaming = ({config, changeWin}: IProps) => {
       }
     })
 
-    selectList = selectList.map((item, index) => {
-      return {
-        ...item,
-        style: {
-          ...item.style,
-          top: 0,
-          left: leftOffset + (index + 1) * baseWidth * 2 + "px",
-        }
-      }
-    })
-
     setClearList([...clearList, ...tempClearList]);
-    setSelectList(selectList);
+    setSelectList(formatItemList(selectList));
 
     // 已完成的卡片
-    setDoneCard(clearList.length);
+    setDoneCard([...clearList, ...tempClearList].length);
 
     // 判断输赢
     if (selectList.length >= 7) {
       changeWin(false);
       return;
     }
-    if (clearList.length === totalCard) {
+    if ([...clearList, ...tempClearList].length === totalCard) {
       changeWin(true);
     }
   }
   // 点击卡片
   const onCardClick = (item: ICardItem, index: number) => {
+    // 设置历史方块
+    setHistoryList([...historyList, item]);
+    // 如果是点击的暂存
+    if (findItemIndex(item, saveList) > -1) {
+      saveList.splice(index, 1);
+      setSaveList(formatItemList(saveList));
+    }
     // 显示不可见
     cardItemList[index].show = false;
     handleSelectItem(selectList, item);
-    // 这里更新要注意克隆.....
-    // setSelectList([...selectList, item]);
+
     // 重新计算覆盖率
     setCardItemList(calcuCover(config, cardItemList));
   }
+
+  // 点击使用暂存道具
+  const saveCard = () => {
+    if (saveList.length !== 0 || selectList.length === 0) {
+      message.info('您现在不能使用暂存道具')
+      return;
+    }
+    if (!saveCount) {
+      message.warn('您的暂存次数已用完')
+      return;
+    }
+    setSaveCount(saveCount - 1)
+
+    setSaveList(formatItemList(selectList.slice(0, 3)));
+    setSelectList(formatItemList(selectList.slice(3)));
+  }
+
+  // 随机打乱牌
+  const shuffle = () => {
+    if (!shuffleCount) {
+      message.warn('您的洗牌次数已用完');
+      return;
+    }
+    const length = cardItemList.length;
+    cardItemList.forEach((item, index) => {
+      const randNum = Math.floor(length * Math.random());
+      const newItem = cardItemList[randNum];
+      const temp = item;
+      cardItemList[index] = {
+        ...item,
+        x: newItem.x,
+        y: newItem.y,
+        z: newItem.z,
+        style: {
+          ...item.style,
+          left: newItem.style.left,
+          top: newItem.style.top,
+        }
+      }
+      cardItemList[randNum] = {
+        ...newItem,
+        x: temp.x,
+        y: temp.y,
+        z: temp.z,
+        style: {
+          ...newItem.style,
+          left: temp.style.left,
+          top: temp.style.top,
+        }
+      }
+    });
+
+    cardItemList.sort((a: ICardItem, b: ICardItem) => a.z - b.z);
+    setCardItemList([...calcuCover(config, cardItemList)]);
+    setShuffleCount(shuffleCount - 1)
+  }
+
+  // 点击使用撤回道具
+  const onClickWithDraw = () => {
+    if (!historyList.length) {
+      message.info('你暂时还没有任何操作');
+      return;
+    }
+    if (!retryCount) {
+      message.warn('您的撤回次数已用完');
+      return;
+    }
+    while(historyList.length) {
+      let withDrawItem = historyList.pop() as ICardItem;
+      if (findItemIndex(withDrawItem, clearList) < 0) {
+        let selectIndex = findItemIndex(withDrawItem, selectList);
+        let saveIndex = findItemIndex(withDrawItem, saveList);
+        let cardIndex = findItemIndex(withDrawItem, cardItemList)
+        if (selectIndex > -1) {
+          selectList.splice(selectIndex, 1);
+        }
+        if (saveIndex > -1) {
+          saveList.splice(saveIndex, 1);
+        }
+        cardItemList[cardIndex] = {
+          ...withDrawItem,
+          show: true,
+        }
+        // 卡片类型
+        setCardItemList([...cardItemList])
+        setSaveList(formatItemList(saveList));
+        setSelectList(formatItemList(selectList));
+        setRetryCount(retryCount - 1);
+        break;
+      }
+    }
+    // 设置历史卡片
+    setHistoryList([...historyList])
+    // 重新计算覆盖率
+    setCardItemList(calcuCover(config, cardItemList));
+  }
+
   return (
     <div style={{ width, height }} className="card-wrap">
+      <div className="tips">已消除卡片: {doneCard} / {totalCard}</div>
       {
         cardItemList.map((item, index) => 
           // 展示列表
@@ -145,10 +260,22 @@ const Gaming = ({config, changeWin}: IProps) => {
           }
         )
       }
-      {
-
-      }
-      <div className="select-list" style={{ width: width + baseWidth * 2, height: baseHeight * 2 }}>
+      <div className="save-list" style={{ width: 3 * baseWidth * 2, height: baseHeight * 2 }}>
+        {
+          saveList.map((item, index) =>
+            // 暂存列表
+            <div
+              key={item.key}
+              style={item.style}
+              className='card-item'
+              onClick={() => onCardClick(item, index)}
+            >
+              { item.content }
+            </div>
+          )
+        }
+      </div>
+      <div className="select-list" style={{ width: 7 * baseWidth * 2, height: baseHeight * 2 }}>
         {
           selectList.map((item, index) =>
             // 已选列表
@@ -163,9 +290,9 @@ const Gaming = ({config, changeWin}: IProps) => {
         }
       </div>
       <div className="tools">
-        <div className="tools-item">{ SVG_LIST.SAVE }</div>
-        <div className="tools-item">{ SVG_LIST.RETRY }</div>
-        <div className="tools-item">{ SVG_LIST.SHUFFLE }</div>
+        <Badge count={saveCount} showZero><div className="tools-item" onClick={saveCard}>{ SVG_LIST.SAVE }</div></Badge>
+        <Badge count={retryCount} showZero><div className="tools-item" onClick={onClickWithDraw}>{ SVG_LIST.RETRY }</div></Badge>
+        <Badge count={shuffleCount} showZero><div className="tools-item" onClick={shuffle}>{ SVG_LIST.SHUFFLE }</div></Badge>
       </div>
       {
         clearList.map((item) => 

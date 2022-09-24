@@ -6,6 +6,9 @@ export const DEFAULT_CONFIG: IConfig = {
   baseHeight: 21, 
   cardRandom: 0.2, // 卡片密度
   maxCardType: 11, // 物品种类
+  retryNumber: 3, // 撤回数
+  saveNumber: 3, // 暂存数
+  shuffleNumber: 3, // 洗牌数
 }
 
 export const STEP_TYPE = {

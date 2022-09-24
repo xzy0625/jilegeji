@@ -1,0 +1,19 @@
+.config-box {
+  width: 800px;
+  margin: 100px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.config-box > div {
+  width: 800px;
+}
+
+.btn-list {
+  margin-top: 30px;
+  display: flex;
+  justify-self: center;
+  margin-left: 100px;
+}

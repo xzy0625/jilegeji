@@ -139,3 +139,8 @@ export const calcuCover = ({x, y}: IConfig, cardItemList: ICardItem[]): ICardIte
 
   return cardItemList;
 }
+
+// 找到某个列表元素的索引
+export const findItemIndex = (cardItem: ICardItem, itemList: ICardItem[]) => {
+  return itemList.findIndex(item => item.key === cardItem.key);
+}
