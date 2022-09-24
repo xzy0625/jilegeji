@@ -22,6 +22,9 @@ jilegeji.zyxiong.com
 
 ![image-20220924203257350](https://csuxzy-images-1300770696.cos.ap-guangzhou.myqcloud.com/image-20220924203257350.png)
 
+### 运行
+```yarn install```
+```yarn dev```
 ### 核心原理
 
 1. 由于没有使用redux，所有的配置都放置在顶层组件上，方便使用

@@ -1,6 +1,6 @@
 import { Button, Col, InputNumber, Row, Slider } from 'antd';
 import { DEFAULT_CONFIG } from '../../config';
-import NumberStep from '../common/numberStep';
+import NumberStep from '../common/NumberStep';
 import './index.css'
 interface IProps {
   config: IConfig;
